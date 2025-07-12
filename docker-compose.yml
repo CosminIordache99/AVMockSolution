@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  av.api:
+    build:
+      context: ./AV.API
+      dockerfile: Dockerfile
+    image: av.api:latest
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5046:80"
+    # depends_on:
+    #   - av.db
+
+  # av.db:
+  #   image: nouchka/sqlite3
+  #   volumes:
+  #     - ./data/avmock.db:/data/avmock.db
+
+  csharp-client:
+    build:
+      context: ./Clients/CSharpClient
+      dockerfile: Dockerfile
+    image: av.csharpclient:latest
+    environment:
+      - API_BASE_URL=http://av.api
+    depends_on:
+      - av.api
+
+  # node-client:
+  #   build:
+  #     context: ./Clients/NodeJsClient
+  #     dockerfile: Dockerfile
+  #   image: av.nodeclient:latest
+  #   depends_on:
+  #     - av.api
+
+  react-client:
+    build:
+      context: ./Clients/ReactTsClient
+      dockerfile: Dockerfile
+    image: av.reactclient:latest
+    ports:
+      - "3000:80" 
+    environment:
+      - REACT_APP_API_BASE_URL=http://av.api
+    depends_on:
+      - av.api

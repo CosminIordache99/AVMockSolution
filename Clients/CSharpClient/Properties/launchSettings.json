@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CSharpClient": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
