@@ -8,19 +8,29 @@ namespace AV.API.Controllers
     public class RealTimeController : ControllerBase
     {
         private readonly IAVEngine _engine;
-        public RealTimeController(IAVEngine engine) => _engine = engine;
+        private readonly ILogger<RealTimeController> _logger;
+
+        public RealTimeController(IAVEngine engine, ILogger<RealTimeController> logger)
+        {
+            _engine = engine;
+            _logger = logger;
+        }
 
         [HttpPost("enable")]
-        public IActionResult Enable()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> Enable(CancellationToken ct)
         {
-            _engine.EnableRealTime();
+            await _engine.EnableRealTimeAsync();
+            _logger.LogInformation("Real-time scanning enabled");
             return Ok();
         }
 
         [HttpPost("disable")]
-        public IActionResult Disable()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> Disable(CancellationToken ct)
         {
-            _engine.DisableRealTime();
+            await _engine.DisableRealTimeAsync();
+            _logger.LogInformation("Real-time scanning disabled");
             return Ok();
         }
     }

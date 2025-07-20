@@ -1,6 +1,5 @@
 using AV.API.Hubs;
-using AV.Engine;
-using AV.Engine.Core.Interfaces;
+using AV.Engine.DI;
 
 internal class Program
 {
@@ -8,7 +7,13 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddScoped<IAVEngine, AVEngine>();
+        //builder.Services.AddScoped<IAVEngine, AVEngine>();
+        //builder.Services.AddScoped<IEventStore, InMemoryEventStore>();
+        //builder.Services.AddSingleton<IEventStore, InMemoryEventStore>();
+        //builder.Services.AddSingleton<IThreatSimulator, ThreatSimulator>();
+        //builder.Services.AddTransient<IScanEngine, MockScanEngine>();
+        //builder.Services.AddSingleton<IAVEngine, AVEngine>();
+        builder.Services.AddAVEngineServices();
         builder.Services.AddSignalR();
 
         //builder.Services.AddDbContext<AvDbContext>(opts =>

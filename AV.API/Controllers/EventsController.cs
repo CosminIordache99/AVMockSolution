@@ -1,4 +1,4 @@
-﻿using AV.Engine.Core.Entities;
+﻿using AV.API.DTOs;
 using AV.Engine.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,61 +9,31 @@ namespace AV.API.Controllers
     public class EventsController : ControllerBase
     {
         private readonly IAVEngine _engine;
-        public EventsController(IAVEngine engine) => _engine = engine;
+        private readonly ILogger<EventsController> _logger;
 
-        public record ThreatInfoDto(string FilePath, string ThreatName);
-        public record ScanSessionDto(
-            DateTime StartTimestamp,
-            DateTime StopTimestamp,
-            string Reason,
-            IEnumerable<ThreatInfoDto> Threats
-        );
-
-        [HttpGet]
-        public IActionResult GetAll()
+        public EventsController(IAVEngine engine, ILogger<EventsController> logger)
         {
-            var events = _engine.GetPersistedEvents().ToList();
-            var sessions = new List<ScanSessionDto>();
+            _engine = engine;
+            _logger = logger;
+        }
 
-            DateTime? startTime = null;
-            var currentThreats = new List<ThreatInfoDto>();
-
-            foreach (var e in events)
-            {
-                switch (e)
-                {
-                    case ScanStartedEvent se:
-                        startTime = se.Timestamp;
-                        currentThreats.Clear();
-                        break;
-
-                    case ThreatsFoundEvent te when startTime.HasValue:
-                        foreach (var t in te.Threats)
-                        {
-                            currentThreats.Add(new ThreatInfoDto(t.FilePath, t.ThreatName));
-                        }
-                        break;
-
-                    case ScanStoppedEvent se when startTime.HasValue:
-                        sessions.Add(new ScanSessionDto(
-                            StartTimestamp: startTime.Value,
-                            StopTimestamp: se.Timestamp,
-                            Reason: se.Reason,
-                            Threats: new List<ThreatInfoDto>(currentThreats)
-                        ));
-                        startTime = null;
-                        currentThreats.Clear();
-                        break;
-                }
-            }
-
+        /// <summary>Get completed scan sessions, each with its start/stop and any threats.</summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<ScanSessionDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<ScanSessionDto>>> Get(CancellationToken ct)
+        {
+            var events = await _engine.GetPersistedEventsAsync();
+            var sessions = ScanSessionMapper.ToSessions(events);
+            _logger.LogInformation("Returning {Count} sessions", sessions.Count());
             return Ok(sessions);
         }
 
         [HttpDelete]
-        public IActionResult Clear()
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<ActionResult> Clear(CancellationToken ct)
         {
-            _engine.ClearPersistedEvents();
+            await _engine.ClearPersistedEventsAsync();
+            _logger.LogInformation("Cleared all events");
             return NoContent();
         }
     }
