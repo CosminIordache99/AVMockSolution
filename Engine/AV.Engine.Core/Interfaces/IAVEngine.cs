@@ -12,7 +12,8 @@ namespace AV.Engine.Core.Interfaces
         Task StopScanAsync();
         IEnumerable<ScanEvent> GetPersistedEvents();
         void ClearPersistedEvents();
-
-        event EventHandler<ScanEvent> ScanEventOccurred;
+        event EventHandler<ThreatsFoundEvent> ThreatsFound;
+        event EventHandler<ScanStartedEvent> ScanStarted;
+        event EventHandler<ScanStoppedEvent> ScanStopped;
     }
 }

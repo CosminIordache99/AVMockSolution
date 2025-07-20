@@ -28,15 +28,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-COPY *.csproj ./
-RUN dotnet restore
+COPY Clients/CSharpClient/CSharpClient.csproj Clients/CSharpClient/
+COPY AV.SDK/AV.SDK.csproj               AV.SDK/
+RUN dotnet restore Clients/CSharpClient/CSharpClient.csproj
 
 COPY . . 
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish Clients/CSharpClient/CSharpClient.csproj -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 EXPOSE 80
 
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "Clients.CSharpClient.dll"]
+ENTRYPOINT ["dotnet", "CSharpClient.dll"]

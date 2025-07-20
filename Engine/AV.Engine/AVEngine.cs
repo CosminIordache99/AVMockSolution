@@ -13,11 +13,11 @@ namespace AV.Engine
         private readonly object _lock = new();
         private readonly Random _rnd = new();
 
-        //de mutat IAVEngine intr un proiect CORE astefel incat SDK sa aiba nevoie doar de ENGINE si nu si de CORE
-
         public bool RealTimeEnabled { get; private set; }
 
-        public event EventHandler<ScanEvent> ScanEventOccurred;
+        public event EventHandler<ThreatsFoundEvent> ThreatsFound;
+        public event EventHandler<ScanStartedEvent> ScanStarted;
+        public event EventHandler<ScanStoppedEvent> ScanStopped;
 
         public void EnableRealTime()
         {
@@ -42,13 +42,9 @@ namespace AV.Engine
                 _onDemandCts = new CancellationTokenSource();
             }
 
-            var started = new ScanEvent
-            {
-                Timestamp = DateTime.UtcNow,
-                EventType = ScanEventType.ScanStarted
-            };
-            _store.Add(started);
-            ScanEventOccurred?.Invoke(this, started);
+            var startedEvent = new ScanStartedEvent { Timestamp = DateTime.UtcNow };
+            _store.Add(startedEvent);
+            ScanStarted?.Invoke(this, startedEvent);
 
             _ = RunOnDemandScan(_onDemandCts.Token);
             return StartScanResult.Success;
@@ -72,25 +68,23 @@ namespace AV.Engine
             try
             {
                 await Task.Delay(duration, token);
-                var stopped = new ScanEvent
+                var stopped = new ScanStoppedEvent
                 {
                     Timestamp = DateTime.UtcNow,
-                    EventType = ScanEventType.ScanStopped,
                     Reason = "Completed"
                 };
                 _store.Add(stopped);
-                ScanEventOccurred?.Invoke(this, stopped);
+                ScanStopped?.Invoke(this, stopped);
             }
             catch (TaskCanceledException)
             {
-                var stopped = new ScanEvent
+                var stopped = new ScanStoppedEvent
                 {
                     Timestamp = DateTime.UtcNow,
-                    EventType = ScanEventType.ScanStopped,
                     Reason = "Forced"
                 };
                 _store.Add(stopped);
-                ScanEventOccurred?.Invoke(this, stopped);
+                ScanStopped?.Invoke(this, stopped);
             }
             finally
             {
@@ -107,14 +101,13 @@ namespace AV.Engine
 
                 if (threats.Count > 0)
                 {
-                    var evt = new ScanEvent
+                    var threatEvent = new ThreatsFoundEvent
                     {
                         Timestamp = DateTime.UtcNow,
-                        EventType = ScanEventType.ThreatsFound,
                         Threats = threats
                     };
-                    _store.Add(evt);
-                    ScanEventOccurred?.Invoke(this, evt);
+                    _store.Add(threatEvent);
+                    ThreatsFound?.Invoke(this, threatEvent);
                 }
 
                 lock (_lock) { _onDemandCts = null; }
@@ -135,13 +128,13 @@ namespace AV.Engine
                         FilePath = $@"C:\mock\realtime\file{_rnd.Next(1, 100)}.dll",
                         ThreatName = $"RTThreat{_rnd.Next(1, 10)}"
                     };
-                    var evt = new ScanEvent
+                    var evt = new ThreatsFoundEvent
                     {
                         Timestamp = DateTime.UtcNow,
                         Threats = new List<ThreatInfo> { threat }
                     };
                     _store.Add(evt);
-                    ScanEventOccurred?.Invoke(this, evt);
+                    ThreatsFound?.Invoke(this, evt);
                 }
             }
         }
