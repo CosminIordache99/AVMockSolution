@@ -126,7 +126,7 @@ namespace AV.Engine
                 _currentScanId = Guid.NewGuid().ToString();
                 _isOnDemandScanRunning = true;
 
-                var startedEvent = new ScanStartedEvent { ScanId = _currentScanId };
+                var startedEvent = new ScanStartedEvent { ScanId = _currentScanId, ScanType = ScanType.OnDemand };
                 await _eventStore.AddAsync(startedEvent);
                 ScanStarted?.Invoke(this, startedEvent);
 
@@ -231,6 +231,7 @@ namespace AV.Engine
                 {
                     var threatEvent = new ThreatDetectedEvent
                     {
+                        ScanId = _currentScanId,
                         Threat = threat,
                         ScanType = ScanType.OnDemand
                     };

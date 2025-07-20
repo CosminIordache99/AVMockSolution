@@ -23,8 +23,8 @@ namespace AV.API.Controllers
         public async Task<ActionResult<IEnumerable<ScanSessionDto>>> Get(CancellationToken ct)
         {
             var events = await _engine.GetPersistedEventsAsync();
-            var sessions = ScanSessionMapper.ToSessions(events);
-            _logger.LogInformation("Returning {Count} sessions", sessions.Count());
+            var sessions = ScanSessionMapper.ToScanResults(events);
+            _logger.LogInformation(message: "Returning {Count} sessions");
             return Ok(sessions);
         }
 

@@ -20,6 +20,7 @@ namespace AV.Engine.Core.Entities
     {
         public override string EventType => "ScanStarted";
         public string ScanId { get; set; }
+        public ScanType ScanType { get; set; }
     }
 
     public sealed class ScanStoppedEvent : ScanEvent
@@ -27,12 +28,14 @@ namespace AV.Engine.Core.Entities
         public override string EventType => "ScanStopped";
         public string ScanId { get; set; }
         public string Reason { get; set; }
+        public ScanType ScanType { get; set; }
     }
 
     public sealed class ThreatDetectedEvent : ScanEvent
     {
         public override string EventType => "ThreatDetected";
         public ThreatInfo Threat { get; set; }
+        public string ScanId { get; set; }
         public ScanType ScanType { get; set; }
     }
 
