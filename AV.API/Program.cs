@@ -7,12 +7,6 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        //builder.Services.AddScoped<IAVEngine, AVEngine>();
-        //builder.Services.AddScoped<IEventStore, InMemoryEventStore>();
-        //builder.Services.AddSingleton<IEventStore, InMemoryEventStore>();
-        //builder.Services.AddSingleton<IThreatSimulator, ThreatSimulator>();
-        //builder.Services.AddTransient<IScanEngine, MockScanEngine>();
-        //builder.Services.AddSingleton<IAVEngine, AVEngine>();
         builder.Services.AddAVEngineServices();
         builder.Services.AddSignalR();
 

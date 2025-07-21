@@ -24,7 +24,6 @@ namespace AV.API.DTOs
         bool IsEnabled
     );
 
-    // DTO final
     public record ScanResultDto(
         IReadOnlyList<ScanSessionDto> OnDemandSessions,
         IReadOnlyList<RealTimeThreatDto> RealTimeThreats,
@@ -36,7 +35,6 @@ namespace AV.API.DTOs
         {
             var ordered = events.OrderBy(e => e.Timestamp).ToList();
 
-            // 2) Construim sesiunile On-Demand
             var sessions = new List<ScanSessionDto>();
             DateTime? start = null;
             string? reason = null;
@@ -76,7 +74,6 @@ namespace AV.API.DTOs
                 }
             }
 
-            // 3) Extragem amenințările Real-Time
             var rtThreats = ordered
                 .OfType<ThreatDetectedEvent>()
                 .Where(te => te.ScanType == ScanType.RealTime)
@@ -87,7 +84,6 @@ namespace AV.API.DTOs
                 ))
                 .ToList();
 
-            // 4) Extragem schimbările de status Real-Time
             var rtStatuses = ordered
                 .OfType<RealTimeScanStatusChangedEvent>()
                 .Select(e => new RealTimeStatusDto(
