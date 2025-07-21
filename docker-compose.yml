@@ -1,41 +1,35 @@
 version: '3.8'
 
 services:
+  # avdb:
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: avmock
+  #   # volumes:
+  #   #   - avdb-data:/var/lib/postgresql/data
+
   av.api:
     build:
-      context: ./AV.API
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: AV.API/Dockerfile
     image: av.api:latest
     environment:
       - ASPNETCORE_URLS=http://+:80
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "5046:80"
-    # depends_on:
-    #   - av.db
-
-  # av.db:
-  #   image: nouchka/sqlite3
-  #   volumes:
-  #     - ./data/avmock.db:/data/avmock.db
 
   csharp-client:
     build:
-      context: ./Clients/CSharpClient
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Clients/CSharpClient/Dockerfile
     image: av.csharpclient:latest
     environment:
       - API_BASE_URL=http://av.api
     depends_on:
       - av.api
-
-  # node-client:
-  #   build:
-  #     context: ./Clients/NodeJsClient
-  #     dockerfile: Dockerfile
-  #   image: av.nodeclient:latest
-  #   depends_on:
-  #     - av.api
 
   react-client:
     build:

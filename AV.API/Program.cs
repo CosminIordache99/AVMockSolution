@@ -1,9 +1,24 @@
+using AV.API.Hubs;
+using AV.Engine.DI;
+
 internal class Program
 {
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        //builder.Services.AddScoped<IAVEngine, AVEngine>();
+        //builder.Services.AddScoped<IEventStore, InMemoryEventStore>();
+        //builder.Services.AddSingleton<IEventStore, InMemoryEventStore>();
+        //builder.Services.AddSingleton<IThreatSimulator, ThreatSimulator>();
+        //builder.Services.AddTransient<IScanEngine, MockScanEngine>();
+        //builder.Services.AddSingleton<IAVEngine, AVEngine>();
+        builder.Services.AddAVEngineServices();
+        builder.Services.AddSignalR();
+
+        //builder.Services.AddDbContext<AvDbContext>(opts =>
+        //    opts.UseNpgsql(builder.Configuration.GetConnectionString("AvPostgres"))
+        //);
 
         builder.Services.AddCors(options =>
         {
@@ -39,6 +54,7 @@ internal class Program
         app.UseAuthorization();
 
         app.MapControllers();
+        app.MapHub<ScanHub>("/scanHub").RequireCors("AllowReact");
 
         app.Run();
     }

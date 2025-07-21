@@ -1,18 +1,38 @@
 ﻿using AV.Engine.Core.Entities;
+using AV.Engine.Core.Enums;
 
 namespace AV.Engine.Core.Interfaces
 {
-    public enum StartScanResult { Success, AlreadyRunning }
-    public interface IAVEngine
+    public interface IAVEngine : IDisposable
     {
-        bool RealTimeEnabled { get; }
-        void EnableRealTime();
-        void DisableRealTime();
-        Task<StartScanResult> StartScanAsync();
-        Task StopScanAsync();
-        IEnumerable<ScanEvent> GetPersistedEvents();
-        void ClearPersistedEvents();
+        bool IsRealTimeEnabled { get; }
+        bool IsOnDemandScanRunning { get; }
 
-        event EventHandler<ScanEvent> ScanEventOccurred;
+        /// <summary>
+        /// Real-time scanning
+        /// </summary>
+        /// <returns></returns>
+        Task EnableRealTimeAsync();
+        Task DisableRealTimeAsync();
+
+        /// <summary>
+        /// On-demand scanning
+        /// </summary>
+        /// <returns></returns>
+        Task<ScanResult> StartOnDemandScanAsync();
+        Task<bool> StopOnDemandScanAsync();
+
+        /// <summary>
+        /// Events and persistence
+        /// </summary>
+        /// <returns></returns>
+        Task<IReadOnlyList<ScanEvent>> GetPersistedEventsAsync();
+        Task ClearPersistedEventsAsync();
+
+        // Events
+        event EventHandler<ThreatDetectedEvent> ThreatDetected;
+        event EventHandler<ScanStartedEvent> ScanStarted;
+        event EventHandler<ScanStoppedEvent> ScanStopped;
+        event EventHandler<RealTimeScanStatusChangedEvent> RealTimeScanStatusChanged;
     }
 }
